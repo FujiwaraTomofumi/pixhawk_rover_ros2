@@ -27,3 +27,21 @@ Imagerで出てくるUbuntu 24.04 Desktopを入れてみるか…
 けど少しカクカクしているような…
 
 22.04を入れてMATEにしてみるか…
+
+## 22.04 Server -> MATE
+22.04 Serverを入れた。
+
+アップデート
+```bash
+sudo apt update
+sudo apt upgrade
+```
+
+
+```bash
+sudo apt install ubuntu-mate-core
+```
+
+とすると、最小構成が入るらしい。
+
+
