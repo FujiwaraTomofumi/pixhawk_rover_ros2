@@ -22,6 +22,27 @@ Pixhawkを載せたローバーをROS2化する
 
 Imagerで出てくるUbuntu 24.04 Desktopを入れてみるか…
 
+### 追記
+リポジトリにnoble-updates, noble-backportsを追加してやってみる。
+
+```bash
+sudo nano /etc/apt/sources.list.d/ubuntu.sources
+```
+以下の`Suites: `のところに、nobleしか記述がない。ここにnoble-updates noble-backportsを追加して保存する。(Ctrl-S, Ctrl-X)
+```bash
+Types: deb
+URIs: http://ports.ubuntu.com/ubuntu-ports
+Suites: noble noble-updates noble-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+Types: deb
+URIs: http://ports.ubuntu.com/ubuntu-ports
+Suites: noble-security
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+```
+
 ## 24.04 Desktop版を入れる
 動いた。
 けど少しカクカクしているような…
