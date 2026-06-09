@@ -44,4 +44,13 @@ sudo apt install ubuntu-mate-core
 
 とすると、最小構成が入るらしい。
 
+これで端末を起動すると早かった。
+が、ROS2 Humbleを入れて、`.bashrc`にROSの`setup.bash`をソースするように記述したら、端末起動に時間がかかるようになった…
+
+起動時に120s待つようになっているので、ネットワークの設定を変える。
+```bash
+sudo systemctl disable systemd-networkd-wait-online.service
+sudo systemctl mask systemd-networkd-wait-online.service
+```
+これでも30sくらい待っているが…？
 
