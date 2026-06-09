@@ -43,6 +43,28 @@ Components: main restricted universe multiverse
 Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 ```
 
+この後、
+```bash
+sudo apt update
+sudo apt upgrade
+```
+
+として再起動。
+
+```bash
+sudo apt install mate-desktop-environment-core
+```
+
+としたら成功した。
+
+再起動してもGUIが出ない。
+
+```bash
+sudo apt install lightdm
+```
+
+として途中でDefault display managerと聞かれたらlightdmを選択。
+
 ## 24.04 Desktop版を入れる
 動いた。
 けど少しカクカクしているような…
