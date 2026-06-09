@@ -97,3 +97,103 @@ sudo systemctl mask systemd-networkd-wait-online.service
 ```
 これでも30sくらい待っているが…？
 
+## Pixhawk載せたローバー制御方法
+ROS2で動かす方法
+1. RC入力を上書きする
+
+    `RC_CHANNELS_OVERRIDE`を設定する。
+
+
+
+1. MANUAL_CONTROLを使う
+
+
+1. GUIDEDモードで速度司令
+
+    多分QAVでやっていた方法。
+
+
+Pixhawkとラズパイつなぎ方
+1. USB接続（かんたん）
+1. シリアル接続  
+    Pixhawk TELEM2 <-> ラズパイUART  
+    - TX -- RX (GPIO15)  
+    - RX -- TX (GPIO14)  
+    - GND -- GND  
+
+USBでつないでテストする。
+
+### RC入力を上書きする
+
+- cmd_vel.linear.x: スロットル
+- cmd_vel.angular.z: ステアリング
+
+に変換して、MAVLinkの`RC_CHANNEL_OVERRIDE`に送る。
+
+1. USBでPixhawkとラズパイをつなぐ。  
+    `ls /dev/ttyACM0 -la`として確認する。`AMA0`というのもあるが…
+
+    groupsで見ると、すでに`rover`と`dialout`が同じグループになっている？権限の変更は不要？
+
+2. ラズパイで作業  
+    ```bash
+    sudo apt install python3-pip
+    pip3 install pymavlink
+    ```
+
+    テストスクリプト作成
+
+    接続チェック (connection_check.py)
+    ```py
+    from pymavlink import mavutil
+
+    master = mavutil.mavlink_connection('/dev/ttyACM0')
+
+    master.wait_heartbeat()
+
+    print("connected")
+    print(master.target_system)
+    ```
+    実行
+    ```bash
+    python3 connection_check.py
+    ```
+
+    - バッテリーつなぐ
+    - PixhawkスイッチON
+    - 送信機ON  
+    にした後、アーム化 (arm.py) 実行
+    ```bash
+    python3 arm.py
+    ```
+    ARM成功！
+
+    ディスアーム化 (disarm.py) 実行
+    ```bash
+    python3 disarm.py
+    ```
+    DISARM成功。
+
+    前進 (forward.py) テスト
+    ```bash
+    python3 forward_test.py
+    ```
+    前進も成功。
+
+    `/cmd_vel`で遠隔操作するノード
+    ```bash
+    ros2 run cmd_vel_to_pixhawk cmd_vel_to_pixhawk
+    ```
+
+    ジョイスティックで遠隔操作
+    ```bash
+    ros2 launch cmd_vel_to_pixhawk joystick.launch.py
+    ```
+
+    - ○: ARM化
+    - ×: DISARM化
+    - R1: セーフティボタン
+    - 左スティック上下：前進後退
+    - 右スティック左右：旋回
+
+
