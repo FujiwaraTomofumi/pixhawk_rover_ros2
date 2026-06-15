@@ -3,7 +3,31 @@ Pixhawkを載せたローバーをROS2化する
 
 ## ローバー
 - CuboRex CuGo V3
-- Pixhawk 2.4.8: 
+- Pixhawk 2.4.8 (ファームウェア: ArduRover 4.6.3)
+
+## 環境
+- Ubuntu 22.04 LTS
+- ROS 2 Humble
+- Python関係：pymavlink, pyserial
+
+## 実行方法
+1. USBケーブルでPixhawkとPCをつなぐ。
+1. PCにジョイスティックをつなぐ。
+1. ローバーにバッテリーをつなぐ。
+1. Pixhawkのセーフティスイッチを長押しする。
+1. ラジコン送信機のスイッチを入れる。
+1. ROSノードを起動する。  
+    ```bash
+    ros2 launch cmd_vel_to_pixhawk joystick.launch.py 
+    ```
+
+    - ○: ARM化
+    - ×: DISARM化
+    - R1: セーフティボタン
+    - 左スティック上下：前進後退
+    - 右スティック左右：旋回
+
+
 
 ## Ubuntu
 ラズパイ4で動かす。
@@ -139,6 +163,7 @@ USBでつないでテストする。
     ```bash
     sudo apt install python3-pip
     pip3 install pymavlink
+    pip3 install pyserial
     ```
 
     テストスクリプト作成
