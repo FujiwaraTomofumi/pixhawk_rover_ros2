@@ -223,6 +223,38 @@ USBでつないでテストする。
 
 ## ラズパイをバッテリーで駆動して動かす
 - ラズパイをホットスポットにする
-    - IPを割り当てる
+
+    ```bash 
+    nmcli device wifi hotspot ifname wlan0 ssid RoverPi password 12345678
+    ```
+
+- IPを割り当てる  
+    ラズパイ側
+    ```bash
+    nm-connection-editor
+    ```
+    としてHotspotを編集。
+
+    IP: 10.1.13.50/24  
+    GW: 10.1.13.1
+
+    一度ホットスポットを再起動する。
+    ```bash
+    nmcli connection down Hotspot 
+    nmcli connection up Hotspot 
+    ```
+
 - ノートPCからログインできるようにする
+
+    WiFIのSSIDから「RoverPi」を探して接続する。
+    ```bash
+    nm-connection-editor
+    ```
+    としてRoverPiを編集。
+
+    IP: 10.1.13.100/24  
+    GW: 10.1.13.1
+
+この状態でRemminaを起動して、RDPで接続を作成。
+
 
