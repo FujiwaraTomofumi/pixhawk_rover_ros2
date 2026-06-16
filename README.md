@@ -10,7 +10,7 @@ Pixhawkを載せたローバーをROS2化する
 - ROS 2 Humble
 - Python関係：pymavlink, pyserial
 
-## 実行方法
+## 実行方法（PC有線接続）
 1. USBケーブルでPixhawkとPCをつなぐ。
 1. PCにジョイスティックをつなぐ。
 1. ローバーにバッテリーをつなぐ。
@@ -27,76 +27,33 @@ Pixhawkを載せたローバーをROS2化する
     - 左スティック上下：前進後退
     - 右スティック左右：旋回
 
+## 実行方法（無線接続）
+1. PCにジョイスティックをつなぐ。
+1. ローバーのラズパイにモバイルバッテリーをつなぐ。
+1. ローバーにバッテリーをつなぐ。
+1. Pixhawkのセーフティスイッチを長押しする。
+1. ラジコン送信機のスイッチを入れる。
+1. ラズパイにリモート接続して、ROSノードを起動する。  
+    ```bash
+    ros2 launch cmd_vel_to_pixhawk without_joystick.launch.py 
+    ```
+1. PCでROSノードを起動する。
+    ```bash
+    ros2 launch cmd_vel_to_pixhawk only_joystick.launch.py 
+    ```
 
+    - ○: ARM化
+    - ×: DISARM化
+    - R1: セーフティボタン
+    - 左スティック上下：前進後退
+    - 右スティック左右：旋回
 
 ## Ubuntu
-ラズパイ4で動かす。
-- Ubuntu 22.04: もっさりしていた。ROS2 Humbleもオーバーヘッドが大きくて遅い感触があった。
-- Ubuntu 24.04: Serverを入れてからMATE Desktopを入れるらしい。ROS2 Jazzyは同等か高速らしい。
+[Ubuntuのインストール試行錯誤](UBUNTU_INSTALL.md)
 
-## ServerからMATEインストール
-1. Raspberry Pi ImagerでUbuntu 24.04 Serverをインストールする。 
-2. ログイン後
-  ```bash
-  sudo apt update
-  sudo apt upgrade
-  sudo apt install ubuntu-mate-desktop
-  ```
-  としたが、依存関係の問題が出てインストールできない。
+Ubuntu 22.04 LTSを入れた。
 
-Imagerで出てくるUbuntu 24.04 Desktopを入れてみるか…
-
-### 追記
-リポジトリにnoble-updates, noble-backportsを追加してやってみる。
-
-```bash
-sudo nano /etc/apt/sources.list.d/ubuntu.sources
-```
-以下の`Suites: `のところに、nobleしか記述がない。ここにnoble-updates noble-backportsを追加して保存する。(Ctrl-S, Ctrl-X)
-```bash
-Types: deb
-URIs: http://ports.ubuntu.com/ubuntu-ports
-Suites: noble noble-updates noble-backports
-Components: main restricted universe multiverse
-Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
-
-Types: deb
-URIs: http://ports.ubuntu.com/ubuntu-ports
-Suites: noble-security
-Components: main restricted universe multiverse
-Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
-```
-
-この後、
-```bash
-sudo apt update
-sudo apt upgrade
-```
-
-として再起動。
-
-```bash
-sudo apt install mate-desktop-environment-core
-```
-
-としたら成功した。
-
-再起動してもGUIが出ない。
-
-```bash
-sudo apt install lightdm
-```
-
-として途中でDefault display managerと聞かれたらlightdmを選択。
-
-## 24.04 Desktop版を入れる
-動いた。
-けど少しカクカクしているような…
-
-22.04を入れてMATEにしてみるか…
-
-## 22.04 Server -> MATE
-22.04 Serverを入れた。
+22.04 Server を入れてから MATE Desktop をインストールする。
 
 アップデート
 ```bash
@@ -104,22 +61,19 @@ sudo apt update
 sudo apt upgrade
 ```
 
-
+MATE Desktop
 ```bash
 sudo apt install ubuntu-mate-core
 ```
 
-とすると、最小構成が入るらしい。
-
-これで端末を起動すると早かった。
-が、ROS2 Humbleを入れて、`.bashrc`にROSの`setup.bash`をソースするように記述したら、端末起動に時間がかかるようになった…
-
-起動時に120s待つようになっているので、ネットワークの設定を変える。
+起動時にネットワーク接続を120s待つようになっているので設定を変えておく。
 ```bash
 sudo systemctl disable systemd-networkd-wait-online.service
 sudo systemctl mask systemd-networkd-wait-online.service
 ```
-これでも30sくらい待っているが…？
+
+## ローバーとPixhawkの作業
+[Pixhawkでローバーを動かす手順](ROVER_SETUP.md)
 
 ## Pixhawk載せたローバー制御方法
 ROS2で動かす方法
@@ -127,15 +81,10 @@ ROS2で動かす方法
 
     `RC_CHANNELS_OVERRIDE`を設定する。
 
-
-
 1. MANUAL_CONTROLを使う
-
-
 1. GUIDEDモードで速度司令
 
     多分QAVでやっていた方法。
-
 
 Pixhawkとラズパイつなぎ方
 1. USB接続（かんたん）
@@ -220,6 +169,9 @@ USBでつないでテストする。
     - R1: セーフティボタン
     - 左スティック上下：前進後退
     - 右スティック左右：旋回
+
+    R1押しながらスティック操作で動作可能。
+    ARM化するならセーフティは不要かも？
 
 ## ラズパイをバッテリーで駆動して動かす
 ### リモートデスクトップの設定
