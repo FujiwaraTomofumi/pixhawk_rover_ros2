@@ -348,7 +348,21 @@ sudo apt-get install openssh-server
 ラズパイにsshを入れると、パスワードログインが無効になっていたので以下を実行する。
 
 ```bash
-sudo nano 
+sudo nano /etc/ssh/sshd_config.d/60-cloudimg-settings.conf
+```
+で開いて
+```
+PasswordAuthentication no
+```
+となっているのを
+```
+PasswordAuthentication yes
+```
+と修正して保存する。
+
+SSHの再起動
+```bash
+sudo systemctl restart ssh 
 ```
 
 RoverPiへの接続（ノートPCから）※ホットスポットに接続して
