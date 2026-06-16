@@ -222,44 +222,138 @@ USBでつないでテストする。
     - 右スティック左右：旋回
 
 ## ラズパイをバッテリーで駆動して動かす
+### リモートデスクトップの設定
 
 
-- ラズパイをホットスポットにする
+操作用ノートPCとラズパイの両方で以下を実行する。
+
+```bash
+sudo apt install xserver-xorg-core xorgxrdp xrdp
+```
+
+以下はラズパイのみ
+
+`/etc/xrdp/xrdp.ini`を修正する．
+
+```bash
+sudo nano /etc/xrdp/xrdp.ini
+```
+で開いて、
+`new_cursors=true` を探して　`new_cursors=false`　に変更。
+`Ctrl + S`, `Ctrl + X` で保存して終了。
+
+`/etc/xrdp/startwm.sh`も同様に開いて以下を追記する．
+```bash
+sudo nano /etc/xrdp/startwm.sh
+```
+```sh
+unset DBUS_SESSION_BUS_ADDRESS
+exec mate-session
+
+test -x /etc/X11/Xsession && exec /etc/X11/Xsession (これは元の行)
+exec /bin/sh /etc/X11/Xsession (これは元の行)
+```
+
+「カラープロファイルを作成するには認証が必要です」と出てくる場合は以下で対処する。
+
+#### 認証を消すには以下を実施
+参考）
+　https://tarufu.info/ubuntu_xrdp_color_profile/  
+　https://tech.nkhn37.net/ubuntu-xrdp-remove-dialog/
+
+`/etc/polkit-1/localauthority.conf.d/02-allow-colord.conf`
+が存在していれば削除する。
+```bash
+sudo rm /etc/polkit-1/localauthority.conf.d/02-allow-colord.conf
+```
+→なかったので削除不要
+
+新しいファイルを作成  
+ルートになって
+```bash
+sudo -i
+nano /etc/polkit-1/localauthority/50-local.d/45-allow-colord.pkla
+```
+
+内容は以下
+```
+[Allow Colord all Users]
+Identity=unix-user:*
+Action=org.freedesktop.color-manager.create-device;org.freedesktop.color-manager.create-profile;org.freedesktop.color-manager.delete-device;org.freedesktop.color-manager.delete-profile;org.freedesktop.color-manager.modify-device;org.freedesktop.color-manager.modify-profile
+ResultAny=no
+ResultInactive=no
+ResultActive=yes
+
+[Allow Package Management all Users]
+Identity=unix-user:*
+Action=org.debian.apt.*;io.snapcraft.*;org.freedesktop.packagekit.*;com.ubuntu.update-notifier.*
+ResultAny=no
+ResultInactive=no
+ResultActive=yes
+```
+
+保存してサービス再起動
+```bash
+sudo systemctl restart polkit.service
+```
+
+#### ラズパイをホットスポットにする
 
     ```bash 
     nmcli device wifi hotspot ifname wlan0 ssid RoverPi password 12345678
     ```
+これでRoverPiというSSIDのホットスポットができる。パスワードは12345678。
 
-- IPを割り当てる  
-    ラズパイ側
-    ```bash
-    nm-connection-editor
-    ```
-    としてHotspotを編集。
+#### IPを割り当てる  
+ラズパイ側
 
-    IP: 10.1.13.50/24  
-    GW: 10.1.13.1
+```bash
+nm-connection-editor
+```
+としてHotspotを編集。
 
-    優先的に自動接続するにチェックを入れて、99に設定。自動で起動するようにしておく。
-    
+IP: 10.1.13.50/24  
+GW: 10.1.13.1
 
-    一度ホットスポットを再起動する。
-    ```bash
-    nmcli connection down Hotspot 
-    nmcli connection up Hotspot 
-    ```
+優先的に自動接続するにチェックを入れて、99に設定。自動で起動するようにしておく。
 
-- ノートPCからログインできるようにする
 
-    WiFIのSSIDから「RoverPi」を探して接続する。
-    ```bash
-    nm-connection-editor
-    ```
-    としてRoverPiを編集。
+一度ホットスポットを再起動する。
+```bash
+nmcli connection down Hotspot 
+nmcli connection up Hotspot 
+```
 
-    IP: 10.1.13.100/24  
-    GW: 10.1.13.1
+#### ノートPCからログインできるようにする
+
+WiFIのSSIDから「RoverPi」を探して接続する。
+```bash
+nm-connection-editor
+```
+としてRoverPiを編集。
+
+IP: 10.1.13.100/24  
+GW: 10.1.13.1
 
 この状態でRemminaを起動して、RDPで接続を作成。
+
+### SSHの設定
+なにかあったらSSHでリモート接続もできるようにしておく。
+
+両方にインストールする
+```bash
+sudo apt-get install openssh-server
+```
+
+ラズパイにsshを入れると、パスワードログインが無効になっていたので以下を実行する。
+
+```bash
+sudo nano 
+```
+
+RoverPiへの接続（ノートPCから）※ホットスポットに接続して
+```bash
+ssh -p 22 rover@10.1.13.50
+```
 
 
